@@ -28,7 +28,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     // You can throw an exception based on either "info" or "err" arguments
     if (err || !user) {
       throw (
-        err || new UnauthorizedException('Email hoặc mật khẩu không chính xác')
+        err ||
+        new UnauthorizedException(
+          'Email hoặc mật khẩu không chính xác, hoặc chưa được xác thực',
+        )
       );
     }
     return user;

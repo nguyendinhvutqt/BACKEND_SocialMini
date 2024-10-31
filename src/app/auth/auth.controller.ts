@@ -7,6 +7,7 @@ import {
   Post,
   Query,
   Request,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -14,6 +15,7 @@ import { LocalAuthGuard } from './local-auth.guard';
 import { CreateUserDto } from 'src/dtos/users/create-user.dto';
 import { Public } from './route-public';
 import { UsersService } from '../users/users.service';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -53,7 +55,7 @@ export class AuthController {
 
   @Public()
   @Get('verify-email')
-  async verifyEmail(@Query('token') token: string) {
+  async verifyEmail(@Query('token') token: string, @Res() res: Response) {
     const user = await this.usersService.findByVerificationToken(token);
     if (!user) {
       throw new HttpException('Token không hợp lệ', HttpStatus.BAD_REQUEST);
@@ -61,7 +63,7 @@ export class AuthController {
 
     await this.usersService.verifyEmail(user._id);
 
-    return { status: 'ok', message: 'Email đã được xác thực thành công' };
+    return res.redirect('http://localhost:5173');
   }
 
   @Get('profile')

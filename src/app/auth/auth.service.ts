@@ -14,7 +14,12 @@ export class AuthService {
 
   async validateUser(email: string, password: string) {
     const user = await this.userModal.findOne({ email: email });
-    if (user && bcrypt.compareSync(password, user?.password)) {
+
+    if (
+      user &&
+      bcrypt.compareSync(password, user?.password) &&
+      user.emailVerified === true
+    ) {
       const { password, ...result } = user;
       return result;
     }
@@ -26,12 +31,12 @@ export class AuthService {
       userId: user._id,
       displayName: user.displayName,
       email: user.email,
-      avatar: user.avatar,
+      avatar: user.avatarUrl,
       sex: user.sex,
       birthDay: user.birthDay,
-      isActive: user.isActive,
     };
     return {
+      user: payload,
       access_token: this.jwtService.sign(payload),
     };
   }

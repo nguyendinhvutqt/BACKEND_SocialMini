@@ -15,6 +15,12 @@ export class UsersService {
     private readonly mailService: MailService,
   ) {}
 
+  async findById(id: string) {
+    return this.userModel
+      .findById(id)
+      .select('_id displayName avatarUrl sex birthDay email friends posts');
+  }
+
   async getAllUser() {
     return this.userModel.find().exec();
   }
@@ -26,6 +32,8 @@ export class UsersService {
   async findByVerificationToken(token: string): Promise<User | null> {
     return await this.userModel.findOne({ emailVerificationToken: token });
   }
+
+  async userAddPost(postId: string) {}
 
   async createUser(createUserDto: CreateUserDto) {
     // Tạo token xác thực
@@ -42,7 +50,9 @@ export class UsersService {
     // Create new user with hashed password
     const newUser = new this.userModel({
       ...createUserDto,
-      displayName: displayName,
+      avatarUrl:
+        'https://wallpapers.com/images/hd/cool-xbox-profile-pictures-9dtcc745il694rjs.jpg',
+      displayName: displayName.trim(),
       password: hashPassword,
       confirmPassword: undefined, // Optional: Exclude confirmPassword from being saved
       emailVerificationToken: verificationToken,
@@ -65,5 +75,18 @@ export class UsersService {
       { emailVerified: true, emailVerificationToken: null },
       { new: true },
     );
+  }
+
+  async searchUsers(query: string) {
+    // Tìm kiếm theo displayName hoặc email
+    return this.userModel
+      .find({
+        $or: [
+          { displayName: { $regex: query, $options: 'i' } },
+          { email: { $regex: query, $options: 'i' } },
+        ],
+      })
+      .select('_id displayName avatarUrl')
+      .exec();
   }
 }
